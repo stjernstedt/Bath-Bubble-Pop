@@ -29,7 +29,8 @@ public class GameLogic : MonoBehaviour
 
 	float timeLapsed = 0;
 	protected float timeLimit = 1;
-	public float maxSpeed = 0.3f;
+	public int minSpeed = 15;
+	public int maxSpeed = 30;
 	public float bombChance = 0.1f;
 	public float minSpawnTime = 0.5f;
 	public float maxSpawnTime = 1.5f;
@@ -49,6 +50,8 @@ public class GameLogic : MonoBehaviour
 	GameObject bombsParent;
 	GameObject starsParent;
 	GameObject randomsParent;
+
+	public bool paused = false;
 
 	// Use this for initialization
 	void Start()
@@ -74,10 +77,14 @@ public class GameLogic : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		if (gameState == GameState.Playing)
+		if (!paused)
 		{
-			CreateBubbles();
-			PopBubble();
+			if (gameState == GameState.Playing)
+			{
+				CreateBubbles();
+				PopBubble();
+			}
+
 		}
 	}
 
@@ -107,7 +114,7 @@ public class GameLogic : MonoBehaviour
 		}
 	}
 
-	GameObject SpawnBubble(BubbleTypes bubbleType)
+	public GameObject SpawnBubble(BubbleTypes bubbleType)
 	{
 		GameObject bubble = bubbles.Pop();
 		Vector3 xStart = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0));
@@ -116,7 +123,8 @@ public class GameLogic : MonoBehaviour
 		float x = Random.Range(xStart.x + padding, xEnd.x - padding);
 		float y = (Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0)).y) - 15f;
 		bubble.transform.position = new Vector3(x, y, 0);
-		bubble.GetComponent<Bubble>().moveSpeed = Random.Range(0.1f, maxSpeed);
+		int movespeed = Random.Range(minSpeed, maxSpeed);
+		bubble.GetComponent<Bubble>().moveSpeed = movespeed;
 		bubble.SetActive(true);
 		timeLapsed = 0;
 		activeBubbles += 1;
@@ -168,6 +176,7 @@ public class GameLogic : MonoBehaviour
 				random.SetActive(true);
 				break;
 		}
+
 		return bubble;
 	}
 
