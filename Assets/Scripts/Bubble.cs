@@ -14,13 +14,14 @@ public class Bubble : MonoBehaviour
 {
 	GameLogic gameLogic;
 	public float moveSpeed;
-	public float acceleration = 10f;
-	public float frequency = 1;
-	public float amplitude = 1;
+	public float acceleration = 30f;
+	public float curveLimit = 10f;
+	//public float frequency = 1;
+	//public float amplitude = 1;
 	float timeElapsed = 0;
 	public int value = 0;
 	bool killZoned = false;
-	bool moveLeft = true;
+	public bool moveLeft = true;
 
 	GameObject bombsParent;
 	GameObject starsParent;
@@ -46,7 +47,7 @@ public class Bubble : MonoBehaviour
 	}
 
 	// Update is called once per frame
-	void Update()
+	void FixedUpdate()
 	{
 		if (!gameLogic.paused)
 		{
@@ -68,22 +69,22 @@ public class Bubble : MonoBehaviour
 
 	void Move()
 	{
-		if (rigidbody.velocity.x < -15)
+		if (rigidbody.velocity.x < -curveLimit)
 		{
 			moveLeft = false;
 		}
-		else if (rigidbody.velocity.x > 15)
+		else if (rigidbody.velocity.x > curveLimit)
 		{
 			moveLeft = true;
 		}
 
 		if (moveLeft)
 		{
-			rigidbody.AddForce(new Vector2(-10, 0));
+			rigidbody.AddForce(new Vector2(-acceleration, 0));
 		}
 		else
 		{
-			rigidbody.AddForce(new Vector2(10, 0));
+			rigidbody.AddForce(new Vector2(acceleration, 0));
 		}
 
 		if (rigidbody.velocity.y < moveSpeed)

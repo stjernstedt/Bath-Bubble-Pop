@@ -29,7 +29,7 @@ public class GameLogic : MonoBehaviour
 	public float minSpawnTime = 0.5f;
 	public float maxSpawnTime = 1.5f;
 	int score = 0;
-	float timer = 11;
+	public float timer = 11;
 	Text scoreText;
 	Text timerText;
 
@@ -79,6 +79,11 @@ public class GameLogic : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
+		if (Input.GetKeyDown(KeyCode.Escape))
+		{
+			Application.Quit();
+		}
+
 		if (!paused)
 		{
 			if (gameState == GameState.Playing)
@@ -113,11 +118,11 @@ public class GameLogic : MonoBehaviour
 				{
 					SpawnBubble(BubbleTypes.Bomb);
 				}
-				else if (number > 0.1f && number <= 0.2f)
+				else if (number > 0.1f && number <= 0.25f)
 				{
 					SpawnBubble(BubbleTypes.Random);
 				}
-				else if (number > 0.2f && number <= 0.3f)
+				else if (number > 0.25f && number <= 0.3f)
 				{
 					SpawnBubble(BubbleTypes.Plustime);
 				}
@@ -133,12 +138,19 @@ public class GameLogic : MonoBehaviour
 	public GameObject SpawnBubble(BubbleTypes bubbleType)
 	{
 		GameObject bubble = bubbles.Pop();
-		Vector3 xStart = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0));
-		Vector3 xEnd = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0));
-		float padding = (xEnd.x - xStart.x) * 0.2f;
-		float x = Random.Range(xStart.x + padding, xEnd.x - padding);
-		float y = (Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0)).y) - 15f;
-		bubble.transform.position = new Vector3(x, y, 0);
+		//Vector3 xStart = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0));
+		//Vector3 xEnd = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0));
+		//float padding = (xEnd.x - xStart.x) * 0.2f;
+		//float x = Random.Range(xStart.x + padding, xEnd.x - padding);
+		//float y = (Camera.main.ViewportToScreenPoint(new Vector3(0, 0, 0)).y) - 15f;
+		float x = Random.Range(0.2f, 0.8f);
+		float y = -0.2f;
+
+		Vector3 startPos = new Vector3(x, y, 1);
+
+		//bubble.transform.position = Camera.main.ViewportToWorldPoint(new Vector3(x, y, 0));
+		//bubble.transform.position = new Vector3(x, y, 0);
+		bubble.transform.position = Camera.main.ViewportToWorldPoint(startPos);
 		int movespeed = Random.Range(minSpeed, maxSpeed);
 		bubble.GetComponent<Bubble>().moveSpeed = movespeed;
 		bubble.SetActive(true);
@@ -147,12 +159,16 @@ public class GameLogic : MonoBehaviour
 		timeLimit = Random.Range(minSpawnTime, maxSpawnTime);
 
 		Bubble bubbleComponent = bubble.GetComponent<Bubble>();
+		if (Random.Range(0f, 1f) < 0.5f)
+		{
+			bubbleComponent.moveLeft = false;
+		}
 
 		switch (bubbleType)
 		{
 			case BubbleTypes.Bomb:
 				GameObject bomb = bombs.Pop();
-				bomb.transform.localScale = new Vector3(0.8f, 0.8f, 1);
+				//bomb.transform.localScale = new Vector3(0.8f, 0.8f, 1);
 				bomb.transform.position = bubble.transform.position;
 				bomb.transform.SetParent(bubble.transform);
 				bomb.SetActive(true);
