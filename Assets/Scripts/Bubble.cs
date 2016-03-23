@@ -2,6 +2,14 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+public enum BubbleTypes
+{
+	Score,
+	Plustime,
+	Bomb,
+	Random
+}
+
 public class Bubble : MonoBehaviour
 {
 	GameLogic gameLogic;
@@ -17,6 +25,7 @@ public class Bubble : MonoBehaviour
 	GameObject bombsParent;
 	GameObject starsParent;
 	GameObject randomsParent;
+	GameObject plussesParent;
 
 	Rigidbody2D rigidbody;
 
@@ -31,6 +40,7 @@ public class Bubble : MonoBehaviour
 		gameLogic = GameObject.Find("Logic").GetComponent<GameLogic>();
 		bombsParent = GameObject.Find("Bombs");
 		starsParent = GameObject.Find("Stars");
+		plussesParent = GameObject.Find("Plusses");
 		randomsParent = GameObject.Find("Randoms");
 		rigidbody = GetComponent<Rigidbody2D>();
 	}
@@ -101,6 +111,11 @@ public class Bubble : MonoBehaviour
 							gameLogic.stars.Push(child.gameObject);
 							child.transform.SetParent(starsParent.transform);
 							break;
+						case "plus":
+							gameLogic.AddTime(value);
+							gameLogic.plusses.Push(child.gameObject);
+							child.transform.SetParent(plussesParent.transform);
+							break;
 						case "random":
 							PopRandom();
 							gameLogic.randoms.Push(child.gameObject);
@@ -121,6 +136,10 @@ public class Bubble : MonoBehaviour
 							gameLogic.stars.Push(child.gameObject);
 							child.transform.SetParent(starsParent.transform);
 							break;
+						case "plus":
+							gameLogic.plusses.Push(child.gameObject);
+							child.transform.SetParent(plussesParent.transform);
+							break;
 						case "random":
 							gameLogic.randoms.Push(child.gameObject);
 							child.transform.SetParent(randomsParent.transform);
@@ -140,13 +159,14 @@ public class Bubble : MonoBehaviour
 	{
 		int bubbleAmount = Random.Range(3, 5);
 
+		int bubbleTypesCount = System.Enum.GetNames(typeof(BubbleTypes)).Length;
+
 		for (int i = 0; i < bubbleAmount; i++)
 		{
-			BubbleTypes bubbleType = (BubbleTypes)Random.Range(0, 2);
+			BubbleTypes bubbleType = (BubbleTypes)Random.Range(0, bubbleTypesCount-1);
 			GameObject bubble = gameLogic.SpawnBubble(bubbleType);
-			Vector2 offset = new Vector2(Random.Range(-10f, 10f), Random.Range(-15f, -5f));
 			bubble.transform.position = transform.position;
-			Vector2 forceVector = new Vector2(Random.Range(-700, 700), Random.Range(-700, 700));
+			Vector2 forceVector = new Vector2(Random.Range(-1500, 1500), Random.Range(-1500, -500));
 			bubble.GetComponent<Rigidbody2D>().AddForce(forceVector);
 		}
 		//gameLogic.paused = true;

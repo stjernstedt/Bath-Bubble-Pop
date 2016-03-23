@@ -10,13 +10,6 @@ public enum GameState
 	Gameover
 }
 
-public enum BubbleTypes
-{
-	Score,
-	Bomb,
-	Random
-}
-
 public class GameLogic : MonoBehaviour
 {
 	public int maxBubbles = 10;
@@ -25,6 +18,7 @@ public class GameLogic : MonoBehaviour
 	public Stack<GameObject> bubbles = new Stack<GameObject>();
 	public Stack<GameObject> bombs = new Stack<GameObject>();
 	public Stack<GameObject> stars = new Stack<GameObject>();
+	public Stack<GameObject> plusses = new Stack<GameObject>();
 	public Stack<GameObject> randoms = new Stack<GameObject>();
 
 	float timeLapsed = 0;
@@ -35,7 +29,9 @@ public class GameLogic : MonoBehaviour
 	public float minSpawnTime = 0.5f;
 	public float maxSpawnTime = 1.5f;
 	int score = 0;
+	float timer = 11;
 	Text scoreText;
+	Text timerText;
 
 	GameObject gameoverScreen;
 
@@ -44,11 +40,13 @@ public class GameLogic : MonoBehaviour
 	GameObject bubblePrefab;
 	GameObject bombPrefab;
 	GameObject starPrefab;
+	GameObject plusPrefab;
 	GameObject randomPrefab;
 
 	GameObject bubblesParent;
 	GameObject bombsParent;
 	GameObject starsParent;
+	GameObject plussesParent;
 	GameObject randomsParent;
 
 	public bool paused = false;
@@ -59,17 +57,21 @@ public class GameLogic : MonoBehaviour
 		bubblePrefab = Resources.Load<GameObject>("Prefabs/bubble");
 		bombPrefab = Resources.Load<GameObject>("Prefabs/bomb");
 		starPrefab = Resources.Load<GameObject>("Prefabs/star");
+		plusPrefab = Resources.Load<GameObject>("Prefabs/plus");
 		randomPrefab = Resources.Load<GameObject>("Prefabs/question mark");
 
 		bubblesParent = GameObject.Find("Bubbles");
 		bombsParent = GameObject.Find("Bombs");
 		starsParent = GameObject.Find("Stars");
+		plussesParent = GameObject.Find("Plusses");
 		randomsParent = GameObject.Find("Randoms");
 
 		gameoverScreen = GameObject.Find("Gameover Screen");
 		gameoverScreen.SetActive(false);
 		scoreText = GameObject.Find("Score Text").GetComponent<Text>();
 		scoreText.text = "" + score;
+		timerText = GameObject.Find("Timer Text").GetComponent<Text>();
+		timerText.text = "" + score;
 
 		ResetGame();
 	}
@@ -81,10 +83,20 @@ public class GameLogic : MonoBehaviour
 		{
 			if (gameState == GameState.Playing)
 			{
+				UpdateTimer();
 				CreateBubbles();
 				PopBubble();
 			}
+		}
+	}
 
+	void UpdateTimer()
+	{
+		timer -= Time.deltaTime;
+		timerText.text = "" + (int)timer;
+		if (timer < 1)
+		{
+			Gameover();
 		}
 	}
 
@@ -101,9 +113,13 @@ public class GameLogic : MonoBehaviour
 				{
 					SpawnBubble(BubbleTypes.Bomb);
 				}
-				if (number > 0.1f && number <= 0.2f)
+				else if (number > 0.1f && number <= 0.2f)
 				{
 					SpawnBubble(BubbleTypes.Random);
+				}
+				else if (number > 0.2f && number <= 0.3f)
+				{
+					SpawnBubble(BubbleTypes.Plustime);
 				}
 				else
 				{
@@ -130,6 +146,8 @@ public class GameLogic : MonoBehaviour
 		activeBubbles += 1;
 		timeLimit = Random.Range(minSpawnTime, maxSpawnTime);
 
+		Bubble bubbleComponent = bubble.GetComponent<Bubble>();
+
 		switch (bubbleType)
 		{
 			case BubbleTypes.Bomb:
@@ -142,10 +160,9 @@ public class GameLogic : MonoBehaviour
 
 			case BubbleTypes.Score:
 				GameObject star = stars.Pop();
-				star.transform.localScale = new Vector3(1, 1, 1);
-				Bubble bubbleComp = bubble.GetComponent<Bubble>();
-				bubbleComp.value = Random.Range(1, 6) * 10;
-				switch (bubbleComp.value)
+				//star.transform.localScale = new Vector3(1, 1, 1);
+				bubbleComponent.value = Random.Range(1, 6) * 10;
+				switch (bubbleComponent.value)
 				{
 					case 10:
 						star.GetComponent<SpriteRenderer>().color = Color.cyan;
@@ -168,9 +185,36 @@ public class GameLogic : MonoBehaviour
 				star.SetActive(true);
 				break;
 
+			case BubbleTypes.Plustime:
+				GameObject plus = plusses.Pop();
+				//plus.transform.localScale = new Vector3(0.8f, 0.8f, 1);
+				bubbleComponent.value = Random.Range(1, 6);
+				switch (bubbleComponent.value)
+				{
+					case 1:
+						plus.GetComponent<SpriteRenderer>().color = Color.cyan;
+						break;
+					case 2:
+						plus.GetComponent<SpriteRenderer>().color = Color.blue;
+						break;
+					case 3:
+						plus.GetComponent<SpriteRenderer>().color = Color.green;
+						break;
+					case 4:
+						plus.GetComponent<SpriteRenderer>().color = Color.yellow;
+						break;
+					case 5:
+						plus.GetComponent<SpriteRenderer>().color = Color.red;
+						break;
+				}
+				plus.transform.position = bubble.transform.position;
+				plus.transform.SetParent(bubble.transform);
+				plus.SetActive(true);
+				break;
+
 			case BubbleTypes.Random:
 				GameObject random = randoms.Pop();
-				random.transform.localScale = new Vector3(0.8f, 0.8f, 1);
+				//random.transform.localScale = new Vector3(0.8f, 0.8f, 1);
 				random.transform.position = bubble.transform.position;
 				random.transform.SetParent(bubble.transform);
 				random.SetActive(true);
@@ -203,6 +247,11 @@ public class GameLogic : MonoBehaviour
 		scoreText.text = "" + this.score;
 	}
 
+	public void AddTime(int time)
+	{
+		timer += time;
+	}
+
 	public void Gameover()
 	{
 		gameState = GameState.Gameover;
@@ -226,6 +275,12 @@ public class GameLogic : MonoBehaviour
 			Destroy(child.gameObject);
 		}
 
+		foreach (Transform child in plussesParent.transform)
+		{
+			Destroy(child.gameObject);
+		}
+
+
 		for (int i = 0; i < maxBubbles + 5; i++)
 		{
 			GameObject bub = Instantiate(bubblePrefab);
@@ -246,6 +301,12 @@ public class GameLogic : MonoBehaviour
 			star.name = "star";
 			stars.Push(star);
 
+			GameObject plus = Instantiate(plusPrefab);
+			plus.SetActive(false);
+			plus.transform.SetParent(plussesParent.transform);
+			plus.name = "plus";
+			plusses.Push(plus);
+
 			GameObject random = Instantiate(randomPrefab);
 			random.SetActive(false);
 			random.transform.SetParent(randomsParent.transform);
@@ -256,6 +317,7 @@ public class GameLogic : MonoBehaviour
 
 		gameoverScreen.SetActive(false);
 		score = 0;
+		timer = 11;
 		scoreText.text = "" + this.score;
 		gameState = GameState.Playing;
 	}
