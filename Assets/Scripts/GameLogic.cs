@@ -29,7 +29,8 @@ public class GameLogic : MonoBehaviour
 	public float minSpawnTime = 0.5f;
 	public float maxSpawnTime = 1.5f;
 	int score = 0;
-	public float timer = 11;
+	public float maxTime = 10;
+	float timer;
 	Text scoreText;
 	Text timerText;
 
@@ -138,27 +139,20 @@ public class GameLogic : MonoBehaviour
 	public GameObject SpawnBubble(BubbleTypes bubbleType)
 	{
 		GameObject bubble = bubbles.Pop();
-		//Vector3 xStart = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0));
-		//Vector3 xEnd = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0));
-		//float padding = (xEnd.x - xStart.x) * 0.2f;
-		//float x = Random.Range(xStart.x + padding, xEnd.x - padding);
-		//float y = (Camera.main.ViewportToScreenPoint(new Vector3(0, 0, 0)).y) - 15f;
+
 		float x = Random.Range(0.2f, 0.8f);
 		float y = -0.2f;
-
 		Vector3 startPos = new Vector3(x, y, 1);
-
-		//bubble.transform.position = Camera.main.ViewportToWorldPoint(new Vector3(x, y, 0));
-		//bubble.transform.position = new Vector3(x, y, 0);
 		bubble.transform.position = Camera.main.ViewportToWorldPoint(startPos);
+
+		Bubble bubbleComponent = bubble.GetComponent<Bubble>();
 		int movespeed = Random.Range(minSpeed, maxSpeed);
-		bubble.GetComponent<Bubble>().moveSpeed = movespeed;
+		bubbleComponent.moveSpeed = movespeed;
 		bubble.SetActive(true);
 		timeLapsed = 0;
 		activeBubbles += 1;
 		timeLimit = Random.Range(minSpawnTime, maxSpawnTime);
 
-		Bubble bubbleComponent = bubble.GetComponent<Bubble>();
 		if (Random.Range(0f, 1f) < 0.5f)
 		{
 			bubbleComponent.moveLeft = false;
@@ -168,7 +162,7 @@ public class GameLogic : MonoBehaviour
 		{
 			case BubbleTypes.Bomb:
 				GameObject bomb = bombs.Pop();
-				//bomb.transform.localScale = new Vector3(0.8f, 0.8f, 1);
+				bomb.transform.localScale = new Vector3(1, 1, 1);
 				bomb.transform.position = bubble.transform.position;
 				bomb.transform.SetParent(bubble.transform);
 				bomb.SetActive(true);
@@ -176,7 +170,7 @@ public class GameLogic : MonoBehaviour
 
 			case BubbleTypes.Score:
 				GameObject star = stars.Pop();
-				//star.transform.localScale = new Vector3(1, 1, 1);
+				star.transform.localScale = new Vector3(1, 1, 1);
 				bubbleComponent.value = Random.Range(1, 6) * 10;
 				switch (bubbleComponent.value)
 				{
@@ -203,7 +197,7 @@ public class GameLogic : MonoBehaviour
 
 			case BubbleTypes.Plustime:
 				GameObject plus = plusses.Pop();
-				//plus.transform.localScale = new Vector3(0.8f, 0.8f, 1);
+				plus.transform.localScale = new Vector3(1, 1, 1);
 				bubbleComponent.value = Random.Range(1, 6);
 				switch (bubbleComponent.value)
 				{
@@ -230,7 +224,7 @@ public class GameLogic : MonoBehaviour
 
 			case BubbleTypes.Random:
 				GameObject random = randoms.Pop();
-				//random.transform.localScale = new Vector3(0.8f, 0.8f, 1);
+				random.transform.localScale = new Vector3(1, 1, 1);
 				random.transform.position = bubble.transform.position;
 				random.transform.SetParent(bubble.transform);
 				random.SetActive(true);
@@ -333,7 +327,7 @@ public class GameLogic : MonoBehaviour
 
 		gameoverScreen.SetActive(false);
 		score = 0;
-		timer = 11;
+		timer = maxTime + 1;
 		scoreText.text = "" + this.score;
 		gameState = GameState.Playing;
 	}
